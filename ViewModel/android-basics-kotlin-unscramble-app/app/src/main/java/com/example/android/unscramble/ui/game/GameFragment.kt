@@ -63,26 +63,13 @@ class GameFragment : Fragment() {
         // Setup a click listener for the Submit and Skip buttons.
         binding.submit.setOnClickListener { onSubmitWord() }
         binding.skip.setOnClickListener { onSkipWord() }
-    }
 
-    override fun onDetach() {
-        super.onDetach()
-        Log.d("GameFragment", "destroy!")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("GameFragment", "DDDDD")
-    }
-
-    private fun updateNextWordOnScreen(){
-        binding.textViewUnscrambledWord.text = viewModel.currentScrambledWord
     }
 
     private fun showFinalScoreDialog(){
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.congratulations))
-            .setMessage(getString(R.string.you_scored, viewModel.score))
+            .setMessage(getString(R.string.you_scored, viewModel.score.value))
             .setCancelable(false)
             .setNegativeButton(getString(R.string.exit)){ _, _ ->
                 exitGame()
@@ -97,9 +84,7 @@ class GameFragment : Fragment() {
         val playerWord = binding.textInputEditText.text.toString()
         if(viewModel.isUserWordCorrect(playerWord)){
             setErrorTextField(false)
-            if(viewModel.nextWord()){
-                updateNextWordOnScreen()
-            } else {
+            if(!viewModel.nextWord()){
                 showFinalScoreDialog()
             }
         } else {
@@ -115,7 +100,6 @@ class GameFragment : Fragment() {
     private fun onSkipWord() {
         if(viewModel.nextWord()){
             setErrorTextField(false)
-            updateNextWordOnScreen()
         } else {
             showFinalScoreDialog()
         }
@@ -129,7 +113,7 @@ class GameFragment : Fragment() {
     private fun restartGame() {
         viewModel.reinitializeData()
         setErrorTextField(false)
-        updateNextWordOnScreen()
+
     }
 
     /*
