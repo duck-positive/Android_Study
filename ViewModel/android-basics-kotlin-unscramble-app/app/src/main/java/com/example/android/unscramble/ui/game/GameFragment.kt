@@ -23,9 +23,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.example.android.unscramble.R
 import com.example.android.unscramble.databinding.GameFragmentBinding
+import com.example.android.unscramble.model.GameViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
@@ -35,7 +38,7 @@ class GameFragment : Fragment() {
 
     // Binding object instance with access to the views in the game_fragment.xml layout
     private lateinit var binding: GameFragmentBinding
-    private val viewModel : GameViewModel by viewModels()
+    private val viewModel : GameViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,21 +54,23 @@ class GameFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Set the viewModel for data binding - this allows the bound layout access
-        // to all the data in the VieWModel
-        binding.gameViewModel = viewModel
-        binding.maxNoOfWords = MAX_NO_OF_WORDS
-        // Specify the fragment view as the lifecycle owner of the binding.
-        // This is used so that the binding can observe LiveData updates
-        binding.lifecycleOwner = viewLifecycleOwner
+        binding.gameFragment = this
+//        binding.apply {
+//            gameViewModel = viewModel
+//            maxNoOfWords = MAX_NO_OF_WORDS
+//            lifecycleOwner = viewLifecycleOwner
+//            gameFragment = this@GameFragment
+//        }
 
         // Setup a click listener for the Submit and Skip buttons.
         binding.submit.setOnClickListener { onSubmitWord() }
         binding.skip.setOnClickListener { onSkipWord() }
-
+        binding.next.setOnClickListener { moveNext() }
     }
 
+    private fun moveNext() {
+        findNavController().navigate(R.id.action_gameFragment_to_explanationFragment)
+    }
     private fun showFinalScoreDialog(){
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.congratulations))

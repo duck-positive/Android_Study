@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package com.example.android.unscramble.ui.game
+package com.example.android.unscramble.model
 
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.TtsSpan
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import androidx.lifecycle.ViewModel
+import com.example.android.unscramble.ui.game.MAX_NO_OF_WORDS
+import com.example.android.unscramble.ui.game.SCORE_INCREASE
+import com.example.android.unscramble.ui.game.allWordsList
 
 /**
  * ViewModel containing the app data and methods to process the data
@@ -31,7 +30,10 @@ import androidx.lifecycle.ViewModel
 class GameViewModel : ViewModel() {
 
     private var wordList : MutableList<String> = mutableListOf()
-    private lateinit var currentWord : String
+
+    private var _currentWord = MutableLiveData<String>()
+    val currentWord : LiveData<String>
+        get() = _currentWord
 
     private val _currentScrambledWord = MutableLiveData<String>()
     val currentScrambledWord : LiveData<String>
@@ -51,17 +53,17 @@ class GameViewModel : ViewModel() {
     }
 
     private fun getNextWord(){
-        currentWord = allWordsList.random()
-        val tempWord = currentWord.toCharArray()
-        while(String(tempWord).equals(currentWord, false)) {
+        _currentWord.value = allWordsList.random()
+        val tempWord = _currentWord.value!!.toCharArray()
+        while(String(tempWord).equals(_currentWord.value, false)) {
             tempWord.shuffle()
         }
-        if(wordList.contains(currentWord)){
+        if(wordList.contains(_currentWord.value)){
             getNextWord()
         } else {
             _currentScrambledWord.value = String(tempWord)
             _currentWordCount.value = _currentWordCount.value?.inc()
-            wordList.add(currentWord)
+            wordList.add(_currentWord.value.toString())
         }
 
     }
@@ -71,7 +73,7 @@ class GameViewModel : ViewModel() {
     }
 
     fun isUserWordCorrect(playerWord : String) : Boolean {
-        if(playerWord.equals(currentWord, true)){
+        if(playerWord.equals(_currentWord.value, true)){
             increaseScore()
             return true
         }
